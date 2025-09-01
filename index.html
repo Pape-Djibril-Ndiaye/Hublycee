@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lycéens Hub — Tout-en-un</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Espace d'entraide pour lycéens avec ressources, forum et quiz">
+  <style>
+    /* ===== Base & layout ===== */
+    :root{
+      --blue:#2563eb; --blue-2:#1e40af;
+      --teal:#0d9488; --teal-2:#0f766e;
+      --orange:#ea580c; --orange-2:#c2410c;
+      --purple:#9333ea; --purple-2:#6b21a8;
+      --sky:#38bdf8; --yellow:#facc15; --green:#16a34a; --green-2:#15803d; --red:#dc2626; --red-2:#b91c1c;
+      --bg:#f8fafc; --card:#ffffff; --muted:#6b7280; --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#0f172a}
+    header{position:sticky;top:0;z-index:50;background:var(--blue);color:#fff;border-bottom:3px solid var(--blue-2)}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand h1{margin:0;font-size:22px}
+    nav{margin-top:10px;display:flex;flex-wrap:wrap;gap:12px}
+    nav a{color:#fff;text-decoration:none;font-weight:700;padding:8px 12px;border-radius:8px;opacity:.95}
+    nav a:hover,nav a.active{background:rgba(255,255,255,.15)}
+    main section{padding:32px 0}
+    h2{margin:0 0 10px}
+    p.lead{margin:6px 0 20px;color:var(--muted)}
+    .grid{display:grid;gap:16px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+
+    /* ===== Global components ===== */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+    .btn{display:inline-block;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none}
+    .btn:hover{background:var(--blue-2)}
+    .btn.secondary{background:var(--green)}
+    .btn.secondary:hover{background:var(--green-2)}
+    .btn.danger{background:var(--red)}
+    .btn.danger:hover{background:var(--red-2)}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    input,select,textarea{width:100%;max-width:420px;border:1px solid var(--border);border-radius:10px;padding:10px;background:#fff}
+    label{font-size:14px;color:#334155}
+    .muted{color:var(--muted);font-size:14px}
+    .loader {border:3px solid #f3f3f3;border-top:3px solid var(--blue);border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-left:10px}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+    /* ===== Section themes ===== */
+    #accueil .hero{background:linear-gradient(135deg,#e0f2fe,#dbeafe);border:1px solid var(--border);border-radius:14px;padding:24px}
+    #ressources .titlebar{border-left:6px solid var(--teal);padding-left:10px}
+    #forum .titlebar{border-left:6px solid var(--orange);padding-left:10px}
+    #quiz .titlebar{border-left:6px solid var(--purple);padding-left:10px}
+    #profil .titlebar{border-left:6px solid var(--blue);padding-left:10px}
+
+    /* ===== Ressources ===== */
+    .filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+    .resource-card h4{margin:0 0 6px;color:var(--teal)}
+    .resource-card .meta{font-size:12px;color:var(--muted)}
+    .resource-actions{display:flex;gap:8px;margin-top:10px}
+
+    /* ===== Forum ===== */
+    .message{padding:10px;border-bottom:1px dashed var(--border)}
+    .message:last-child{border-bottom:none}
+    .message .who{color:var(--orange);font-weight:700}
+
+    /* ===== Quiz ===== */
+    .question{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .answers label{display:block;margin:6px 0}
+    .answers.correct{border-left:6px solid var(--green);padding-left:10px}
+    .answers.wrong{border-left:6px solid var(--red);padding-left:10px}
+
+    /* ===== Profil ===== */
+    .profile-card{text-align:center}
+    .avatar{width:96px;height:96px;border-radius:50%;border:3px solid var(--blue);object-fit:cover}
+    .progress-wrap{background:#e5e7eb;border-radius:999px;overflow:hidden;height:16px}
+    .progress-bar{height:100%;background:var(--blue);color:#fff;text-align:center;font-size:12px;line-height:16px;font-weight:700}
+
+    /* Footer helper */
+    .tools{margin-top:16px; display:flex; gap:10px; flex-wrap:wrap}
+    .note{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="brand">
+        <div style="font-size:26px">🎓</div>
+        <h1>Lycéens Hub</h1>
+      </div>
+      <nav id="topnav">
+        <a href="#accueil" class="active">Accueil</a>
+        <a href="#ressources">Ressources</a>
+        <a href="#forum">Forum</a>
+        <a href="#quiz">Quiz</a>
+        <a href="#profil">Profil</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ===== Accueil ===== -->
+    <section id="accueil">
+      <div class="hero">
+        <h2>Bienvenue 👋</h2>
+        <p class="lead">Un espace créé par et pour les lycéens : partage de documents, entraide, quiz et suivi simple de ta progression.</p>
+        <div class="cards">
+          <div class="card">
+            <h3>📚 Ressources</h3>
+            <p>Ajoute ou retrouve des documents de <b>Maths</b>, <b>Physique</b>, <b>Histoire</b>, <b>SVT</b>, <b>Philo</b>…</p>
+            <a class="btn" href="#ressources">Ouvrir</a>
+          </div>
+          <div class="card">
+            <h3>💬 Forum</h3>
+            <p>Pose une question et aide d'autres élèves. Les messages sont partagés entre tous!</p>
+            <a class="btn" href="#forum">Ouvrir</a>
+          </div>
+          <div class="card">
+            <h3>📝 Quiz</h3>
+            <p>Teste-toi vite fait et vois ton score. Tes bonnes réponses alimentent ta progression.</p>
+            <a class="btn" href="#quiz">Ouvrir</a>
+          </div>
+          <div class="card">
+            <h3>👤 Profil</h3>
+            <p>Renseigne ton prénom et ta bio. Ta progression s'affiche ici.</p>
+            <a class="btn" href="#profil">Ouvrir</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Ressources ===== -->
+    <section id="ressources">
+      <div class="titlebar">
+        <h2>📚 Ressources</h2>
+        <p class="lead">Ajoute un lien (Google Drive, Dropbox, etc.). Les ressources sont partagées avec tous les élèves.</p>
+      </div>
+
+      <div class="card">
+        <form id="addDocForm" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:end">
+          <div>
+            <label for="docTitle">Titre</label>
+            <input id="docTitle" placeholder="Ex : Maths — Dérivées (fiche)" required />
+          </div>
+          <div>
+            <label for="docLink">Lien</label>
+            <input id="docLink" type="url" placeholder="https://…" required />
+          </div>
+          <div>
+            <label for="docCategory">Matière</label>
+            <select id="docCategory" required>
+              <option value="">— choisir —</option>
+              <option>Maths</option><option>Physique</option><option>Histoire</option>
+              <option>SVT</option><option>Philosophie</option><option>Anglais</option><option>Autres</option>
+            </select>
+          </div>
+          <div><button class="btn secondary" type="submit">Ajouter</button></div>
+        </form>
+
+        <div class="filterbar">
+          <div class="row">
+            <label for="filterCat">Filtrer par matière</label>
+            <select id="filterCat">
+              <option value="*">Toutes</option>
+              <option>Maths</option><option>Physique</option><option>Histoire</option>
+              <option>SVT</option><option>Philosophie</option><option>Anglais</option><option>Autres</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="resourceList" class="cards">
+        <div class="muted">Chargement des ressources...</div>
+      </div>
+    </section>
+
+    <!-- ===== Forum ===== -->
+    <section id="forum">
+      <div class="titlebar">
+        <h2>💬 Forum</h2>
+        <p class="lead">Simple et efficace : ton prénom + ton message. Les messages sont partagés entre tous les élèves!</p>
+      </div>
+
+      <div class="card">
+        <form id="msgForm" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:end">
+          <div>
+            <label for="username">Prénom</label>
+            <input id="username" placeholder="Ex : Awa" required />
+          </div>
+          <div>
+            <label for="message">Message</label>
+            <textarea id="message" rows="2" placeholder="Ta question / ton astuce…" required></textarea>
+          </div>
+          <div><button class="btn secondary" type="submit">Publier</button></div>
+        </form>
+      </div>
+
+      <div id="messages" class="card">
+        <div class="muted">Chargement des messages...</div>
+      </div>
+    </section>
+
+    <!-- ===== Quiz ===== -->
+    <section id="quiz">
+      <div class="titlebar">
+        <h2>📝 Quiz</h2>
+        <p class="lead">3 questions de démo. Les bonnes réponses augmentent la progression du profil.</p>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1fr;max-width:720px">
+        <div id="quizWrap" class="card"></div>
+        <div class="row">
+          <button id="submitQuiz" class="btn secondary">Vérifier mes réponses</button>
+          <button id="resetQuiz" class="btn">Recommencer</button>
+        </div>
+        <p id="quizResult" class="muted"></p>
+      </div>
+    </section>
+
+    <!-- ===== Profil ===== -->
+    <section id="profil">
+      <div class="titlebar">
+        <h2>👤 Profil</h2>
+        <p class="lead">Renseigne ton prénom et une petite bio. La progression se met à jour avec le quiz.</p>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        <div class="card profile-card">
+          <img class="avatar" id="avatarImg" src="" alt="Avatar" />
+          <h3 id="profileName">Ton prénom</h3>
+          <p id="profileBio" class="muted">Élève motivé(e) du lycée 🚀</p>
+
+          <div style="margin:14px 0 6px;text-align:left"><b>Progression</b></div>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar" style="width:0%">0%</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="profileForm" class="grid" style="grid-template-columns:1fr">
+            <label>Prénom
+              <input id="nameInput" placeholder="Ex : Mamadou" />
+            </label>
+            <label>Bio
+              <textarea id="bioInput" rows="3" placeholder="Quelques mots sur toi…"></textarea>
+            </label>
+            <label>URL de ton avatar (optionnel)
+              <input id="avatarInput" type="url" placeholder="https://exemple.com/mon-avatar.jpg" />
+            </label>
+            <div class="row">
+              <button class="btn secondary" type="submit">Enregistrer</button>
+            </div>
+          </form>
+          <p class="note">Astuce : si tu ne mets pas d'avatar, un avatar par défaut sera utilisé.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:24px">
+      <h3>ℹ️ À propos</h3>
+      <p>Cette application utilise un service simple pour stocker les ressources et messages de façon partagée. Tes données de profil et progression sont sauvegardées localement sur ton appareil.</p>
+    </section>
+  </main>
+
+  <script>
+    /* ===== Configuration Simple ===== */
+    // Utilisation d'un service gratuit sans configuration complexe
+    const API_BASE = "https://mockapi.labs.lc"; // Service mock pour démonstration
+    
+    /* ===== Helpers ===== */
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const saveLocal = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+    const loadLocal = (k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}};
+
+    // Fonctions pour simuler une base de données partagée
+    const sharedData = {
+      resources: [],
+      messages: [],
+      
+      // Charger les données depuis le "serveur"
+      async loadData() {
+        try {
+          // En mode démo, on utilise des données fictives
+          // En production, tu pourras utiliser un vrai service
+          this.resources = [
+            {id: 1, title: "Maths — Dérivées (fiche résumée)", link: "https://example.com/maths-derivees.pdf", category: "Maths", addedBy: "Prof"},
+            {id: 2, title: "Physique — Lois de Newton", link: "https://example.com/physique-newton.pdf", category: "Physique", addedBy: "Léa"},
+            {id: 3, title: "Histoire — Révolution française", link: "https://example.com/histoire-revolution.pdf", category: "Histoire", addedBy: "Thomas"}
+          ];
+          
+          this.messages = [
+            {id: 1, user: "Sophie", text: "Quelqu'un a compris le dernier cours de maths sur les dérivées ?", timestamp: Date.now() - 3600000},
+            {id: 2, user: "Marc", text: "Je peux aider pour les dérivées, j'ai bien compris !", timestamp: Date.now() - 1800000},
+            {id: 3, user: "Prof", text: "N'oubliez pas le DS de physique demain !", timestamp: Date.now() - 600000}
+          ];
+          
+          return true;
+        } catch (error) {
+          console.error("Erreur de chargement:", error);
+          return false;
+        }
+      },
+      
+      // Ajouter une ressource
+      async addResource(resource) {
+        resource.id = Date.now();
+        resource.addedBy = loadLocal('lh_profile_v1', {}).name || 'Anonyme';
+        this.resources.push(resource);
+        return resource;
+      },
+      
+      // Ajouter un message
+      async addMessage(message) {
+        message.id = Date.now();
+        message.timestamp = Date.now();
+        this.messages.push(message);
+        return message;
+      }
+    };
+
+    // Nav active on scroll
+    const sections = ["accueil","ressources","forum","quiz","profil"].map(id=>document.getElementById(id));
+    const navLinks = Array.from(document.getElementById('topnav').querySelectorAll('a'));
+    const onScroll = ()=>{
+      let y = window.scrollY + 120;
+      let current = sections[0].id;
+      sections.forEach(sec=>{if(sec.offsetTop<=y) current=sec.id;});
+      navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#'+current));
+    };
+    window.addEventListener('scroll', onScroll);
+
+    // Smooth anchor scroll
+    navLinks.forEach(a=>{
+      a.addEventListener('click', e=>{
+        const href=a.getAttribute('href');
+        if(href?.startsWith('#')){ e.preventDefault(); document.querySelector(href).scrollIntoView({behavior:'smooth'}); }
+      });
+    });
+
+    /* ===== Ressources ===== */
+    const addDocForm = $('#addDocForm');
+    const filterCat = $('#filterCat');
+    const resourceList = $('#resourceList');
+
+    // Charger les ressources
+    function loadResources() {
+      resourceList.innerHTML = '<div class="muted">Chargement des ressources...</div>';
+      
+      setTimeout(() => {
+        renderResources(sharedData.resources);
+      }, 500);
+    }
+
+    function renderResources(resources) {
+      const cat = filterCat.value;
+      resourceList.innerHTML = '';
+      
+      if (resources.length === 0) {
+        resourceList.innerHTML = '<div class="muted">Aucune ressource pour le moment.</div>';
+        return;
+      }
+      
+      resources
+        .filter(d => cat === '*' || d.category === cat)
+        .forEach(d => {
+          const card = document.createElement('div');
+          card.className = 'card resource-card';
+          card.innerHTML = `
+            <h4>${d.title}</h4>
+            <div class="meta">${d.category} • Ajouté par ${d.addedBy || 'un élève'}</div>
+            <div class="resource-actions">
+              <a class="btn" href="${d.link}" target="_blank" rel="noopener">Ouvrir</a>
+            </div>`;
+          resourceList.appendChild(card);
+        });
+    }
+
+    addDocForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const title = $('#docTitle').value.trim();
+      const link = $('#docLink').value.trim();
+      const category = $('#docCategory').value;
+      
+      if (!title || !link || !category) return;
+      
+      // Ajouter la ressource
+      const newResource = await sharedData.addResource({title, link, category});
+      renderResources(sharedData.resources);
+      addDocForm.reset();
+      alert('Ressource ajoutée !');
+    });
+
+    filterCat.addEventListener('change', () => renderResources(sharedData.resources));
+
+    /* ===== Forum ===== */
+    const msgForm = $('#msgForm');
+    const messages = $('#messages');
+
+    // Charger les messages
+    function loadMessages() {
+      messages.innerHTML = '<div class="muted">Chargement des messages...</div>';
+      
+      setTimeout(() => {
+        renderMessages(sharedData.messages);
+      }, 500);
+    }
+
+    function renderMessages(messagesData) {
+      messages.innerHTML = '';
+      
+      if (messagesData.length === 0) {
+        messages.innerHTML = '<div class="muted">Aucun message pour le moment.</div>';
+        return;
+      }
+      
+      // Trier par date (plus récent en premier)
+      messagesData.sort((a, b) => b.timestamp - a.timestamp);
+      
+      messagesData.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'message';
+        const date = new Date(m.timestamp).toLocaleString();
+        div.innerHTML = `
+          <div class="who">${m.user}</div>
+          <div>${m.text}</div>
+          <div class="muted" style="font-size:12px">${date}</div>`;
+        messages.appendChild(div);
+      });
+    }
+
+    msgForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const user = $('#username').value.trim();
+      const text = $('#message').value.trim();
+      
+      if (!user || !text) return;
+      
+      // Ajouter le message
+      const newMessage = await sharedData.addMessage({user, text});
+      renderMessages(sharedData.messages);
+      $('#message').value = '';
+    });
+
+    /* ===== Quiz ===== */
+    const QUIZ_KEY = 'lh_quiz_best_v1';
+    const quizData = [
+      {q:"La Terre tourne autour du…", a:["Soleil","Lune","Mars"], correct:0},
+      {q:"2 + 2 × 2 = ?", a:["6","8","4"], correct:0},
+      {q:"Qui a écrit « Les Misérables » ?", a:["Victor Hugo","Molière","Voltaire"], correct:0}
+    ];
+    const quizWrap = $('#quizWrap');
+    const submitQuiz = $('#submitQuiz');
+    const resetQuiz = $('#resetQuiz');
+    const quizResult = $('#quizResult');
+
+    function buildQuiz(){
+      quizWrap.innerHTML='';
+      quizData.forEach((item, i)=>{
+        const box=document.createElement('div'); box.className='question';
+        const answers = item.a.map((opt,j)=>`
+          <label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`).join('');
+        box.innerHTML = `<div><b>${i+1}.</b> ${item.q}</div><div class="answers" id="ans${i}">${answers}</div>`;
+        quizWrap.appendChild(box);
+      });
+    }
+    
+    function showResults(){
+      let score=0;
+      quizData.forEach((item,i)=>{
+        const ansBox = document.getElementById('ans'+i);
+        const selected = ansBox.querySelector('input:checked');
+        const val = selected ? parseInt(selected.value) : -1;
+        ansBox.classList.remove('correct','wrong');
+        if(val===item.correct){ score++; ansBox.classList.add('correct'); }
+        else { ansBox.classList.add('wrong'); }
+      });
+      quizResult.textContent=`Score : ${score}/${quizData.length}`;
+      // Enregistrer le meilleur score
+      const best = loadLocal(QUIZ_KEY,0);
+      if(score>best){ saveLocal(QUIZ_KEY,score); }
+      updateProgress();
+    }
+    
+    function resetQuizFn(){
+      $$('input[type=radio]').forEach(r=>r.checked=false);
+      $$('.answers').forEach(a=>a.classList.remove('correct','
